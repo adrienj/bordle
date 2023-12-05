@@ -8,6 +8,7 @@ const dailyCountry = countries[new Date().getDate()];
 const dailyCountryCoordinates = (async () => {
   return getCountryBorders(dailyCountry);
 })();
+const SCORE_LIMIT = 0.90;
 
 console.log(`You'd find it anyway... Today's country is ${dailyCountry}`);
 
@@ -34,12 +35,13 @@ function App() {
     const countryBorders = await dailyCountryCoordinates;
 
     const newScore = shapeSimilarity(
-      stroke.paths,
-      countryBorders.map(([x, y]) => ({ x, y })),
+      countryBorders,
+      stroke.paths, 
+      { estimationPoints: 500 , restrictRotationAngle: 0.5 }
     );
 
     setScore(newScore);
-    if (newScore > 95) {
+    if (newScore > SCORE_LIMIT) {
       confetti({
         particleCount: 100,
         spread: 70,
@@ -62,8 +64,8 @@ function App() {
         </p>
         {score ? (
           <div>
-            <div>Score : {Math.round(+score)}%</div>
-            {score > 95
+            <div>Score : {Math.round(+score * 100)}%</div>
+            {score > SCORE_LIMIT
               ? `Congratulations! The country was ${dailyCountry}!`
               : null}
           </div>
@@ -92,7 +94,12 @@ async function getCountryBorders(country: string) {
   const geometry = json.results[0]?.geo_shape.geometry;
 
   if (geometry.type === "MultiPolygon") {
-    return geometry.coordinates[0][0];
+    const longestPolygon = geometry.coordinates.reduce((acc, curr) =>
+      acc.length > curr[0].length ? acc : curr[0],
+    ).map(([y, x]) => ({ x, y }));
+    console.log(longestPolygon);
+    return longestPolygon;
   }
-  return geometry.coordinates[0];
+  
+  return geometry.coordinates[0].map(([y, x]) => ({ x, y }));
 }
