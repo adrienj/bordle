@@ -8,7 +8,7 @@ const dailyCountry = countries[new Date().getDate()];
 const dailyCountryCoordinates = (async () => {
   return getCountryBorders(dailyCountry);
 })();
-const SCORE_LIMIT = 0.90;
+const SCORE_LIMIT = 0.70;
 
 console.log(`You'd find it anyway... Today's country is ${dailyCountry}`);
 
@@ -66,7 +66,7 @@ function App() {
           <div>
             <div>Score : {Math.round(+score * 100)}%</div>
             {score > SCORE_LIMIT
-              ? `Congratulations! The country was ${dailyCountry}!`
+              ? `Close enough! Congratulations, today's country is ${dailyCountry}!`
               : null}
           </div>
         ) : (
